@@ -7,8 +7,6 @@ MORE THINGS TO ADD:
 
 """
 
-
-
 import typer
 from typing_extensions import Annotated
 from rich.console import Console
@@ -44,6 +42,13 @@ def delete(position: int):
     todos.deleting_task(position)
     show()
 
+@app.command()
+def update(position: int, status: bool):
+    todos.update_status(position, status)
+    show()
+
+
+
 #Display the tasks
 @app.command()
 def show():
@@ -64,6 +69,7 @@ def show():
         table.add_column("Category", min_width=12, justify="right")
         table.add_column("Status", min_width=12, justify="right")
 
+        #Hardcoded for now
         def get_category_color(category):
             colours = {'Learn': 'cyan', 'Coding': 'red', 'Study': 'cyan', 'Misc': 'green'}
             if category in colours:
@@ -72,9 +78,7 @@ def show():
 
         for idx, task in enumerate(tasks, start=0):
             colour = get_category_color(task.category)
-            #Perhaps there's a better way
-            status = False
-            done = '✅' if status else '❌'
+            done = '✅' if task.status == True else '❌'
             table.add_row(str(idx), task.task, f'[{colour}]{task.category}[/{colour}]', done)
         console.print(table)
     else:

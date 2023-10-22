@@ -8,19 +8,20 @@ console = Console()
 class todos:
     tasks = []
 
-    def __init__(self, task: str, category: str, status=None):
+    def __init__(self, task: str, category: str, status: bool):
         self.task = task
         self.category = category
-        self.status = status if status is not None else 1
+        #might change to bool
+        self.status = False if status != True else True
     
     def to_dict(self):
-        return {"task": self.task, "category": self.category}
+        return {"task": self.task, "category": self.category, "status": self.status}
 
     @staticmethod
     def check_headers_exist(file):
         # Read the first line to check for headers
         first_line = file.readline()
-        return "task" in first_line and "category" in first_line
+        return "task" in first_line and "category" and "status" in first_line
 
     @classmethod
     def adding_task(cls, task: str, category: str):
@@ -30,7 +31,7 @@ class todos:
         file_exists = os.path.exists('tasks.csv')
 
         with open('tasks.csv', "r+", newline="") as file:
-            fieldnames = ["task", "category"]
+            fieldnames = ["task", "category", "status"]
             writer = csv.DictWriter(file, fieldnames=fieldnames)
 
             # Check if the file is empty (no tasks written yet)
@@ -60,14 +61,26 @@ class todos:
 
         #update the tasks
         with open('tasks.csv', 'w', newline='') as file:
-            fieldnames = ["task", "category"]
+            fieldnames = ["task", "category", "status"]
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(data)
 
+    @classmethod
+    def update_status(cls, position: int, status: bool):
+        tasks = cls.load_tasks()
+        if 0 <= position < len(tasks):
+            task = tasks[position]
+            task.status = status
+            # console.log(task.status)
 
-    # @classmethod
-    # def update_progress(cls)
+        with open('tasks.csv', "w", newline="") as file:
+            fieldnames = ["task", "category", "status"]
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            for task in tasks:
+                writer.writerow(task.to_dict())
+
 
     @classmethod
     def load_tasks(cls):
@@ -76,8 +89,10 @@ class todos:
             with open('tasks.csv', "r", newline="") as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    task = cls(row["task"], row["category"])
-                    # task.is_done = row.get("is_done", "False") == "True"
+                    #  task = cls(row["task"], row["category"], row["status"] == 'True')
+                    task = cls(row["task"], row["category"], row["status"] == 'True')
+                    # console.log(task.status)
+                    # task.status = False if row.get("status", "False") else True
                     tasks.append(task)
         except FileNotFoundError:
             pass
